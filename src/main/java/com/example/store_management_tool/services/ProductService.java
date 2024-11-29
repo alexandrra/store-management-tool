@@ -1,6 +1,6 @@
 package com.example.store_management_tool.services;
 
-import com.example.store_management_tool.data.Product;
+import com.example.store_management_tool.data.entities.Product;
 import com.example.store_management_tool.data.ProductRequestDto;
 import com.example.store_management_tool.data.repositories.ProductRepository;
 import org.springframework.beans.BeanUtils;
@@ -17,7 +17,7 @@ public class ProductService {
     @Autowired
     public ProductRepository repository;
 
-    public ResponseEntity<List<Product>> getAllProducts(){
+    public ResponseEntity<List<Product>> getAllProducts() {
         try
         {
             return new ResponseEntity<>(repository.findAll(), HttpStatus.OK);

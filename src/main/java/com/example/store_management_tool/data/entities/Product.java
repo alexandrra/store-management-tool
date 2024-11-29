@@ -1,4 +1,4 @@
-package com.example.store_management_tool.data;
+package com.example.store_management_tool.data.entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
