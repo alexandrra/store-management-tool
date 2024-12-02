@@ -11,7 +11,7 @@ import java.util.*;
 @Data
 @Entity
 @NoArgsConstructor
-public class User implements UserDetails {
+public class StoreUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "customer_id")

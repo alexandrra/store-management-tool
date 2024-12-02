@@ -1,7 +1,7 @@
 package com.example.store_management_tool.controllers;
 
 import com.example.store_management_tool.data.UserRequestDto;
-import com.example.store_management_tool.data.entities.User;
+import com.example.store_management_tool.data.entities.StoreUser;
 import com.example.store_management_tool.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,15 +20,15 @@ public class UserController {
         return userService.addUser(user);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
+    public ResponseEntity<List<StoreUser>> getUsers() {
         return userService.getAllUsers();
     }
 
-    @PreAuthorize("hasRole('ADMIN', 'USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @GetMapping("user/{username}")
-    public ResponseEntity<User> getUserByUsername(@PathVariable String username) {
+    public ResponseEntity<StoreUser> getUserByUsername(@PathVariable String username) {
         return userService.getUserByUsername(username);
     }
 

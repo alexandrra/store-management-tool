@@ -2,7 +2,7 @@ package com.example.store_management_tool.services;
 
 import com.example.store_management_tool.data.UserRequestDto;
 import com.example.store_management_tool.data.entities.Role;
-import com.example.store_management_tool.data.entities.User;
+import com.example.store_management_tool.data.entities.StoreUser;
 import com.example.store_management_tool.data.repositories.RoleRepository;
 import com.example.store_management_tool.data.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class UserService {
             String role = Boolean.TRUE.equals(user.isAdmin()) ? "ROLE_ADMIN" : "ROLE_USER";
             Role userRole = roleRepository.findByAuthority(role).orElseThrow(() -> new NoSuchElementException(("Authority not present")));
 
-            User userToBeAdded = new User();
+            StoreUser userToBeAdded = new StoreUser();
             userToBeAdded.setUsername(user.getUsername());
             userToBeAdded.setPassword(passwordEncoder.encode(user.getPassword()));
             userToBeAdded.setRole(userRole);
@@ -46,7 +46,7 @@ public class UserService {
         return new ResponseEntity<>("Error while adding user", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public ResponseEntity<User> getUserByUsername(String username) {
+    public ResponseEntity<StoreUser> getUserByUsername(String username) {
         try
         {
             if (userRepository.findByUsername(username).isPresent())
@@ -57,7 +57,7 @@ public class UserService {
             e.printStackTrace();
         }
 
-        return new ResponseEntity<>(new User(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new StoreUser(), HttpStatus.NOT_FOUND);
     }
 
     public ResponseEntity<String> deleteUser(int id) {
@@ -72,7 +72,7 @@ public class UserService {
         return new ResponseEntity<>("Error while deleting user", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<StoreUser>> getAllUsers() {
         try
         {
             return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);

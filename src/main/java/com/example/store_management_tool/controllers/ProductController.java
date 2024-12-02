@@ -26,7 +26,7 @@ public class ProductController {
         return service.getProductById(id);
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @PostMapping("product")
     public ResponseEntity<String> addProduct(@RequestBody ProductRequestDto product){
         return service.addProduct(product);
