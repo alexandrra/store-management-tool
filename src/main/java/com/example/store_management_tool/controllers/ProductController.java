@@ -25,15 +25,8 @@ public class ProductController {
             @RequestParam(defaultValue = "5", required = false) int pageSize,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
             @RequestParam(defaultValue = "true", required = false) boolean ascending) {
-        try {
-            ProductResponseDto response = service.getAllProducts(pageNo, pageSize, sortBy, ascending);
-            return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
-        }
+        ProductResponseDto response = service.getAllProducts(pageNo, pageSize, sortBy, ascending);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @GetMapping("products/{id}")
@@ -46,54 +39,33 @@ public class ProductController {
                 return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ProductResponseDto("Error while getting the product", "error", null));        }
+            throw e;
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @PutMapping("products/{id}")
     public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable int id, @RequestBody ProductRequestDto product) {
-        try {
-            var response = service.updateProduct(id, product);
-            if (response.getResponse() == null)
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            else
-                return new ResponseEntity<>(response,HttpStatus.OK);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ProductResponseDto("Error while updating the product", "error", null));
-        }
+        var response = service.updateProduct(id, product);
+        if (response.getResponse() == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        else
+            return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @PostMapping("products")
     public ResponseEntity<ProductResponseDto> addProduct(@RequestBody ProductRequestDto product) {
-        try {
-            var response = service.addProduct(product);
-            if (response.getResponse() == null)
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            else
-                return new ResponseEntity<>(response,HttpStatus.CREATED);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ProductResponseDto("Error while adding the product", "error", null));
-        }
+        var response = service.addProduct(product);
+        if (response.getResponse() == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        else
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("products/{id}")
     public ResponseEntity<ProductResponseDto> deleteProduct(@PathVariable int id) {
-        try {
-            return ResponseEntity.status(HttpStatus.OK).body(service.deleteProduct(id));
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ProductResponseDto("Error while deleting the product", "error", null));        }
+        return ResponseEntity.status(HttpStatus.OK).body(service.deleteProduct(id));
     }
 }

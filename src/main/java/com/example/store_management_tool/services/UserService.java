@@ -3,8 +3,11 @@ package com.example.store_management_tool.services;
 import com.example.store_management_tool.data.dtos.UserRequestDto;
 import com.example.store_management_tool.data.entities.Role;
 import com.example.store_management_tool.data.entities.StoreUser;
+import com.example.store_management_tool.data.exceptions.UserAlreadyExistsException;
+import com.example.store_management_tool.data.exceptions.UserNotFoundException;
 import com.example.store_management_tool.data.repositories.RoleRepository;
 import com.example.store_management_tool.data.repositories.UserRepository;
+import com.example.store_management_tool.utils.Constants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,61 +30,31 @@ public class UserService {
     }
 
     public ResponseEntity<String> addUser(UserRequestDto user) {
-        try {
-            String role = Boolean.TRUE.equals(user.isAdmin()) ? "ROLE_ADMIN" : "ROLE_USER";
-            Role userRole = roleRepository.findByAuthority(role).orElseThrow(() -> new NoSuchElementException(("Authority not present")));
+        String role = Boolean.TRUE.equals(user.isAdmin()) ? "ROLE_ADMIN" : "ROLE_USER";
+        Role userRole = roleRepository.findByAuthority(role).orElseThrow(() -> new NoSuchElementException(("Authority not present")));
 
-            StoreUser userToBeAdded = new StoreUser();
-            userToBeAdded.setUsername(user.getUsername());
-            userToBeAdded.setPassword(passwordEncoder.encode(user.getPassword()));
-            userToBeAdded.setRole(userRole);
-            userRepository.save(userToBeAdded);
+        StoreUser userToBeAdded = new StoreUser();
+        userToBeAdded.setUsername(user.getUsername());
+        userToBeAdded.setPassword(passwordEncoder.encode(user.getPassword()));
+        userToBeAdded.setRole(userRole);
+        userRepository.save(userToBeAdded);
 
-            return new ResponseEntity<>("User added successfully", HttpStatus.CREATED);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return new ResponseEntity<>("Error while adding user", HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>("User added successfully", HttpStatus.CREATED);
     }
 
     public ResponseEntity<StoreUser> getUserByUsername(String username) {
-        try
-        {
-            if (userRepository.findByUsername(username).isPresent())
-                return new ResponseEntity<>(userRepository.findByUsername(username).get(), HttpStatus.OK);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        if (userRepository.findByUsername(username).isEmpty())
+            throw new UserNotFoundException(Constants.USER_NOT_FOUND);
 
-        return new ResponseEntity<>(new StoreUser(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(userRepository.findByUsername(username).get(), HttpStatus.OK);
     }
 
     public ResponseEntity<String> deleteUser(int id) {
-        try {
-            userRepository.deleteById(id);
-            return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return new ResponseEntity<>("Error while deleting user", HttpStatus.INTERNAL_SERVER_ERROR);
+        userRepository.deleteById(id);
+        return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
     }
 
     public ResponseEntity<List<StoreUser>> getAllUsers() {
-        try
-        {
-            return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
     }
 }
