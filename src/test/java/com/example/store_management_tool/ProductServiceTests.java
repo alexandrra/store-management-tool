@@ -1,6 +1,5 @@
 package com.example.store_management_tool;
 
-import com.example.store_management_tool.data.dtos.ProductPageResponseDto;
 import com.example.store_management_tool.data.dtos.ProductRequestDto;
 import com.example.store_management_tool.data.dtos.ProductResponseDto;
 import com.example.store_management_tool.data.entities.Product;
@@ -11,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.*;
 
 import static org.mockito.BDDMockito.given;
@@ -30,6 +31,9 @@ public class ProductServiceTests {
     @Mock
     private ProductRepository productRepository;
 
+    @Spy
+    private ModelMapper modelMapper;
+
     @Test
     void getAllProducts_withValidProductList_ShouldReturnList() {
         Product product1 = new Product(1, "testProduct1", "description", "category", 20, 10, new Date(), new Date());
@@ -42,7 +46,7 @@ public class ProductServiceTests {
 
         Page<Product> products = new PageImpl<>(List.of(product1, product2), pageable, 2);
         given(productRepository.findAll(pageable)).willReturn(products);
-        ProductPageResponseDto response = productService.getAllProducts(pageNo, pageSize, sortBy, ascending);
+        ProductResponseDto response = productService.getAllProducts(pageNo, pageSize, sortBy, ascending);
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo("success");

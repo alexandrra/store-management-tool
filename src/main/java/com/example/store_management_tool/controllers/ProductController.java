@@ -1,6 +1,5 @@
 package com.example.store_management_tool.controllers;
 
-import com.example.store_management_tool.data.dtos.ProductPageResponseDto;
 import com.example.store_management_tool.data.dtos.ProductRequestDto;
 import com.example.store_management_tool.data.dtos.ProductResponseDto;
 import com.example.store_management_tool.services.ProductService;
@@ -21,13 +20,13 @@ public class ProductController {
     }
 
     @GetMapping("products")
-    public ResponseEntity<ProductPageResponseDto> getAllProducts(
+    public ResponseEntity<ProductResponseDto> getAllProducts(
             @RequestParam(defaultValue = "0", required = false) int pageNo,
             @RequestParam(defaultValue = "5", required = false) int pageSize,
             @RequestParam(defaultValue = "id", required = false) String sortBy,
             @RequestParam(defaultValue = "true", required = false) boolean ascending) {
         try {
-            ProductPageResponseDto response = service.getAllProducts(pageNo, pageSize, sortBy, ascending);
+            ProductResponseDto response = service.getAllProducts(pageNo, pageSize, sortBy, ascending);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
@@ -54,7 +53,7 @@ public class ProductController {
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @PutMapping("products/{id}")
-    public ResponseEntity<ProductResponseDto> updateProduct(@RequestParam int id, @RequestBody ProductRequestDto product) {
+    public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable int id, @RequestBody ProductRequestDto product) {
         try {
             var response = service.updateProduct(id, product);
             if (response.getResponse() == null)

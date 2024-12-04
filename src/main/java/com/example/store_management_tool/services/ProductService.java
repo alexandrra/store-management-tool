@@ -1,6 +1,5 @@
 package com.example.store_management_tool.services;
 
-import com.example.store_management_tool.data.dtos.ProductPageResponseDto;
 import com.example.store_management_tool.data.dtos.ProductRequestDto;
 import com.example.store_management_tool.data.dtos.ProductResponseDto;
 import com.example.store_management_tool.data.entities.Product;
@@ -24,19 +23,19 @@ public class ProductService {
     private final ModelMapper mapper;
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductService.class);
 
-    public ProductService(ProductRepository repository) {
+    public ProductService(ProductRepository repository, ModelMapper modelMapper) {
         this.repository = repository;
-        mapper = new ModelMapper();
+        this.mapper = modelMapper;
     }
 
-    public ProductPageResponseDto getAllProducts(int pageNo, int pageSize, String sortBy, boolean ascending) {
+    public ProductResponseDto getAllProducts(int pageNo, int pageSize, String sortBy, boolean ascending) {
         try {
             // Retrieve product list on pagination limits
             Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
             Pageable pageable = PageRequest.of(pageNo, pageSize, sort);
             Page<Product> fetchedProducts = repository.findAll(pageable);
 
-            return new ProductPageResponseDto(Constants.GET_ALL_PRODUCTS_SUCCESS, "success", fetchedProducts, pageNo, pageSize, fetchedProducts.getSize());
+            return new ProductResponseDto(Constants.GET_ALL_PRODUCTS_SUCCESS, "success", fetchedProducts);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

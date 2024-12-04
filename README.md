@@ -18,6 +18,12 @@ Features:
 Technology stack:
 - Java with SpringBoot for creating RESTful services
 - SpringSecurity for username/password authentication and role based access control 
-- H2 in-memory database for rapid testing and development
+- SQL Server database for development 
 - Hibernate with JPA for easy data manipulation
 - Lombok for clean and readable code
+
+Database setup:
+- Before running the project, you must run a SQL Server container in Docker using the following commands:
+  - docker pull mcr.microsoft.com/mssql/server
+  - docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Str0ngPa$$w0rd" -p 1433:1433 -d mcr.microsoft.com/mssql/ser
+    ver
