@@ -1,4 +1,4 @@
-package com.example.store_management_tool.data;
+package com.example.store_management_tool.data.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

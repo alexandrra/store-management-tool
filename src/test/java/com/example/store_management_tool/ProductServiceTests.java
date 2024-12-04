@@ -1,18 +1,22 @@
 package com.example.store_management_tool;
 
-import com.example.store_management_tool.data.ProductRequestDto;
+import com.example.store_management_tool.data.dtos.ProductPageResponseDto;
+import com.example.store_management_tool.data.dtos.ProductRequestDto;
+import com.example.store_management_tool.data.dtos.ProductResponseDto;
 import com.example.store_management_tool.data.entities.Product;
 import com.example.store_management_tool.data.repositories.ProductRepository;
 import com.example.store_management_tool.services.ProductService;
+import com.example.store_management_tool.utils.Constants;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.*;
+
 import static org.mockito.BDDMockito.given;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,99 +32,120 @@ public class ProductServiceTests {
 
     @Test
     void getAllProducts_withValidProductList_ShouldReturnList() {
-        Product product1 = Product.builder()
-                .id(1)
-                .name("testProduct")
-                .description("description")
-                .price(20)
-                .quantity(3)
-                .build();
+        Product product1 = new Product(1, "testProduct1", "description", "category", 20, 10, new Date(), new Date());
+        Product product2 = new Product(1, "testProduct1", "description", "category", 20, 10, new Date(), new Date());
+        int pageNo = 0;
+        int pageSize = 5;
+        String sortBy = "id";
+        boolean ascending = true;
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by("id").ascending());
 
-        Product product2 = Product.builder()
-                .id(2)
-                .name("testProduct2")
-                .description("description2")
-                .price(20)
-                .quantity(3)
-                .build();
-
-        given(productRepository.findAll()).willReturn(List.of(product1, product2));
-        ResponseEntity<List<Product>> response = productService.getAllProducts();
+        Page<Product> products = new PageImpl<>(List.of(product1, product2), pageable, 2);
+        given(productRepository.findAll(pageable)).willReturn(products);
+        ProductPageResponseDto response = productService.getAllProducts(pageNo, pageSize, sortBy, ascending);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(List.of(product1, product2));
+        assertThat(response.getStatus()).isEqualTo("success");
+        assertThat(response.getMessage()).isEqualTo(Constants.GET_ALL_PRODUCTS_SUCCESS);
+        assertThat(response.getResponse()).isEqualTo(products);
     }
 
     @Test
-    void getProduct_withInvalidId_ShouldReturnError() {
-        int invalidId = 0;
-
-        ResponseEntity<Product> response = productService.getProductById(invalidId);
+    void getProduct_notInRepository_ShouldReturnError() {
+        int id = 10;
+        given(productRepository.findById(id)).willReturn(Optional.empty());
+        ProductResponseDto response =  productService.getProductById(id);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getStatus()).isEqualTo("error");
+        assertThat(response.getMessage()).isEqualTo(Constants.PRODUCT_NOT_FOUND);
     }
 
     @Test
     void getProduct_withValidId_ShouldReturnProduct() {
-        Product product = Product.builder()
-                .id(1)
-                .name("testProduct")
-                .description("description")
-                .price(20)
-                .quantity(3)
-                .build();
+        Product product = new Product(1, "testProduct", "description", "category", 20, 10, new Date(), new Date());
 
         given(productRepository.findById(1)).willReturn(Optional.of(product));
-        ResponseEntity<Product> response = productService.getProductById(product.getId());
+        ProductResponseDto response = productService.getProductById(product.getId());
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo(product);
+        assertThat(response.getStatus()).isEqualTo("success");
+        assertThat(response.getMessage()).isEqualTo(Constants.GET_PRODUCT_BY_ID_SUCCESS);
+        assertThat(response.getResponse()).isEqualTo(product);
     }
 
     @Test
     void addProduct_withValidInput_ShouldReturnSuccess() {
         ProductRequestDto productToBeAdded = new ProductRequestDto("testName", "description", "testCategory", 10, 10);
 
-        ResponseEntity<String> response = productService.addProduct(productToBeAdded);
+        ProductResponseDto response = productService.addProduct(productToBeAdded);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isEqualTo("Product added successfully");
+        assertThat(response.getStatus()).isEqualTo("success");
+        assertThat(response.getMessage()).isEqualTo(Constants.ADD_PRODUCT_SUCCESS);
     }
 
     @Test
     void addProduct_withInvalidInput_ShouldReturnError() {
         ProductRequestDto productWithInvalidName = new ProductRequestDto("testName2", "description", "testCategory", 10, 10);
 
-        ResponseEntity<String> response = productService.addProduct(productWithInvalidName);
+        ProductResponseDto response = productService.addProduct(productWithInvalidName);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isEqualTo("Product name should not contain any digit");
+        assertThat(response.getStatus()).isEqualTo("error");
+        assertThat(response.getMessage()).isEqualTo(Constants.PRODUCT_NAME_NOT_VALID);
     }
 
     @Test
-    void deleteProduct_withInvalidId_ShouldReturnError() {
-        int invalidId = 0;
+    void updateProduct_withValidInput_ShouldReturnSuccess() {
+        int id = 10;
+        ProductRequestDto productDto = new ProductRequestDto("name", "description", "testCategory", 10, 10);
+        Product productEntity = new Product(id, "testName", "description", "category", 20, 10, new Date(), new Date());
 
-        ResponseEntity<String> response = productService.deleteProduct(invalidId);
+        given(productRepository.findById(id)).willReturn(Optional.of(productEntity));
+        ProductResponseDto response = productService.updateProduct(id, productDto);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(response.getBody()).isEqualTo("Invalid ID");
+        assertThat(response.getStatus()).isEqualTo("success");
+        assertThat(response.getMessage()).isEqualTo(Constants.UPDATE_PRODUCT_SUCCESS);
+    }
+
+    @Test
+    void updateProduct_withInvalidInput_ShouldReturnError() {
+        int id = 10;
+        ProductRequestDto productWithInvalidName = new ProductRequestDto("testName2", "description", "testCategory", 10, 10);
+        Product productEntity = new Product(1, "testName", "description", "category", 20, 10, new Date(), new Date());
+
+        given(productRepository.findById(id)).willReturn(Optional.of(productEntity));
+        ProductResponseDto response = productService.updateProduct(id, productWithInvalidName);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo("error");
+        assertThat(response.getMessage()).isEqualTo(Constants.PRODUCT_NAME_NOT_VALID);
+    }
+
+    @Test
+    void deleteProduct_notInRepository_ShouldReturnError() {
+        int id = 10;
+
+        given(productRepository.findById(id)).willReturn(Optional.empty());
+        ProductResponseDto response = productService.deleteProduct(id);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getStatus()).isEqualTo("error");
+        assertThat(response.getMessage()).isEqualTo(Constants.PRODUCT_NOT_FOUND);
     }
 
     @Test
     void deleteProduct_withValidId_ShouldReturnSuccess() {
         int id = 10;
-
-        ResponseEntity<String> response = productService.deleteProduct(id);
+        Product productEntity = new Product(id, "testName", "description", "category", 20, 10, new Date(), new Date());
+        given(productRepository.findById(id)).willReturn(Optional.of(productEntity));
+        ProductResponseDto response = productService.deleteProduct(id);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isEqualTo("Product deleted successfully");
+        assertThat(response.getStatus()).isEqualTo("success");
+        assertThat(response.getMessage()).isEqualTo(Constants.DELETE_PRODUCT_SUCCESS);
+        assertThat(response.getResponse()).isEqualTo(id);
     }
 }

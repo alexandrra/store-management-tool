@@ -11,6 +11,7 @@ Features:
 - Products management (authentication required for all the actions):
   - see all available products
   - get specific product by its id 
+  - update product 
   - add new products - or update quantity if product already present (admin/user role required)
   - delete product (admin rights required)
 

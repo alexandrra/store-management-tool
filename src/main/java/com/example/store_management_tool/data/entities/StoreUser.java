@@ -2,7 +2,6 @@ package com.example.store_management_tool.data.entities;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -10,7 +9,7 @@ import java.util.*;
 
 @Data
 @Entity
-@NoArgsConstructor
+@Table(name = "user")
 public class StoreUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

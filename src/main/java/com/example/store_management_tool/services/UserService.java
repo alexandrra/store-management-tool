@@ -1,11 +1,10 @@
 package com.example.store_management_tool.services;
 
-import com.example.store_management_tool.data.UserRequestDto;
+import com.example.store_management_tool.data.dtos.UserRequestDto;
 import com.example.store_management_tool.data.entities.Role;
 import com.example.store_management_tool.data.entities.StoreUser;
 import com.example.store_management_tool.data.repositories.RoleRepository;
 import com.example.store_management_tool.data.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,14 +16,15 @@ import java.util.NoSuchElementException;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public ResponseEntity<String> addUser(UserRequestDto user) {
         try {
