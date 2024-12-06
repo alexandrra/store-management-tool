@@ -9,7 +9,8 @@ Features:
   - see all available users or search for a specific one by username (authentication and admin/user role required)
   - remove a user by his id (authentication and admin rights required)
 - Products management (authentication required for all the actions):
-  - see all available products
+  - see all available products (pagination implemented)
+  - get all products from a specific category
   - get specific product by its id 
   - update product 
   - add new products - or update quantity if product already present (admin/user role required)

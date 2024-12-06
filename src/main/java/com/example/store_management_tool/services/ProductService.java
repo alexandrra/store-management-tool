@@ -3,8 +3,7 @@ package com.example.store_management_tool.services;
 import com.example.store_management_tool.data.dtos.ProductRequestDto;
 import com.example.store_management_tool.data.dtos.ProductResponseDto;
 import com.example.store_management_tool.data.entities.Product;
-import com.example.store_management_tool.data.exceptions.InvalidRequestException;
-import com.example.store_management_tool.data.exceptions.ProductAlreadyExistsException;
+import com.example.store_management_tool.data.exceptions.ProductWithTheSameNameAlreadyExistsException;
 import com.example.store_management_tool.data.exceptions.ProductNotFoundException;
 import com.example.store_management_tool.data.repositories.ProductRepository;
 import com.example.store_management_tool.utils.Constants;
@@ -18,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -42,9 +42,9 @@ public class ProductService {
     }
 
     public ProductResponseDto getProductById(int id) {
-
         Optional<Product> product = repository.findById(id);
 
+        // Check if product was found
         if (product.isEmpty())
             throw new ProductNotFoundException(Constants.PRODUCT_NOT_FOUND);
 
@@ -52,21 +52,17 @@ public class ProductService {
         return new ProductResponseDto(Constants.GET_PRODUCT_BY_ID_SUCCESS, "success", product.get());
     }
 
+    public ProductResponseDto getProductsByCategory(String categoryName) {
+        List<Product> products = repository.findByCategory(categoryName);
+
+        LOGGER.info("{} {}", Constants.GET_PRODUCTS_BY_CATEGORY_SUCCESS, categoryName);
+        return new ProductResponseDto(Constants.GET_PRODUCTS_BY_CATEGORY_SUCCESS, "success", products);
+    }
+
     public ProductResponseDto addProduct(ProductRequestDto productDto) {
-        if (productDto == null)
-            throw new InvalidRequestException(Constants.INVALID_NULL_INPUT);
-
-        // Check mandatory fields
-        if (productDto.getName() == null || productDto.getName().isEmpty() || productDto.getName().matches(".*\\d.*"))
-            throw new InvalidRequestException(Constants.PRODUCT_NAME_NOT_VALID);
-        if (productDto.getQuantity() <= 0)
-            throw new InvalidRequestException(Constants.PRODUCT_QUANTITY_NOT_VALID);
-        if (productDto.getPrice() <= 0)
-            throw new InvalidRequestException(Constants.PRODUCT_PRICE_NOT_VALID);
-
         // Check for existing product
         if (repository.findByName(productDto.getName()).isPresent())
-            throw new ProductAlreadyExistsException(Constants.PRODUCT_ALREADY_EXISTS);
+            throw new ProductWithTheSameNameAlreadyExistsException(Constants.PRODUCT_WITH_SAME_NAME_ALREADY_EXISTS);
 
         // Create and populate product entity
         Product productToBeAdded = mapper.map(productDto, Product.class);
@@ -83,14 +79,6 @@ public class ProductService {
         // Check if product exists
         if (repository.findById(id).isEmpty())
             throw new ProductNotFoundException(Constants.PRODUCT_NOT_FOUND);
-
-        // Check mandatory fields
-        if (productDto.getName() == null || productDto.getName().isEmpty() || productDto.getName().matches(".*\\d.*"))
-            throw new InvalidRequestException(Constants.PRODUCT_NAME_NOT_VALID);
-        if (productDto.getQuantity() <= 0)
-            throw new InvalidRequestException(Constants.PRODUCT_QUANTITY_NOT_VALID);
-        if (productDto.getPrice() <= 0)
-            throw new InvalidRequestException(Constants.PRODUCT_PRICE_NOT_VALID);
 
         // Update product entity
         Product productToBeUpdated = mapper.map(productDto, Product.class);

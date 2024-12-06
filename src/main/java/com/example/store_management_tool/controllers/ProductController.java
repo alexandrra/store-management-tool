@@ -3,6 +3,7 @@ package com.example.store_management_tool.controllers;
 import com.example.store_management_tool.data.dtos.ProductRequestDto;
 import com.example.store_management_tool.data.dtos.ProductResponseDto;
 import com.example.store_management_tool.services.ProductService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -31,36 +32,29 @@ public class ProductController {
 
     @GetMapping("products/{id}")
     public ResponseEntity<ProductResponseDto> getProductById(@PathVariable int id) {
-        try {
-            var response = service.getProductById(id);
-            if (response.getResponse() == null)
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            else
-                return ResponseEntity.status(HttpStatus.OK).body(response);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage());
-            throw e;
-        }
+        var response = service.getProductById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("category/{categoryName}")
+    public ResponseEntity<ProductResponseDto> getProductsByCategory(@PathVariable String categoryName) {
+        ProductResponseDto products = service.getProductsByCategory(categoryName);
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @PutMapping("products/{id}")
-    public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable int id, @RequestBody ProductRequestDto product) {
+    public ResponseEntity<ProductResponseDto> updateProduct(@PathVariable int id, @RequestBody @Valid ProductRequestDto product) {
         var response = service.updateProduct(id, product);
-        if (response.getResponse() == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        else
-            return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     @PostMapping("products")
-    public ResponseEntity<ProductResponseDto> addProduct(@RequestBody ProductRequestDto product) {
+    public ResponseEntity<ProductResponseDto> addProduct(@RequestBody @Valid ProductRequestDto product) {
         var response = service.addProduct(product);
-        if (response.getResponse() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        else
-            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasRole('ADMIN')")

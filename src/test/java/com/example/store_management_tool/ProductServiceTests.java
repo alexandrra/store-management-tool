@@ -97,7 +97,7 @@ public class ProductServiceTests {
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo("error");
-        assertThat(response.getMessage()).isEqualTo(Constants.PRODUCT_NAME_NOT_VALID);
+        assertThat(response.getMessage()).isEqualTo("Invalid product name: must be of 3 - 30 characters");
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ProductServiceTests {
 
         assertThat(response).isNotNull();
         assertThat(response.getStatus()).isEqualTo("error");
-        assertThat(response.getMessage()).isEqualTo(Constants.PRODUCT_NAME_NOT_VALID);
+        assertThat(response.getMessage()).isEqualTo("Invalid product name: must be of 3 - 30 characters");
     }
 
     @Test

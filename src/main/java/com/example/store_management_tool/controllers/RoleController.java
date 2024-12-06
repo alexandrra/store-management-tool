@@ -2,6 +2,7 @@ package com.example.store_management_tool.controllers;
 
 import com.example.store_management_tool.data.entities.Role;
 import com.example.store_management_tool.services.RoleService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,8 @@ public class RoleController {
     }
 
     @PostMapping("/role")
-    public ResponseEntity<String> addRole (@RequestBody Role role) {
-        return service.addRole(role);
+    public ResponseEntity<Role> addRole (@RequestBody Role role) {
+        var response = service.addRole(role);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
